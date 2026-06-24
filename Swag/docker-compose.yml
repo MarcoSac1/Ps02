@@ -1,0 +1,10 @@
+services: 
+  swag:
+    image: linuxserver/swag latest 
+    cap_add:
+      - NET_ADMIN
+    environment:
+      file: .env 
+    volumes:
+      - ./config:/config 
+    
