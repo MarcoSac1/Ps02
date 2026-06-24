@@ -1,2 +1,2 @@
-- ciao
+Server configuration
 
