@@ -1,0 +1,35 @@
+server:
+  address: tcp://0.0.0.0:9091
+
+log:
+  level: info
+
+authentication_backend:
+  file:
+    path: /config/users_database.yml
+
+access_control:
+  default_policy: deny
+
+  rules:
+    - domain: whoami.local
+      policy: one_factor
+
+session:
+  secret: "very-long-random-secret"
+
+cookies:
+  - domain: local
+    authelia_url: http://auth.local
+
+storage:
+  local:
+    path: /config/db.sqlite3
+
+notifier:
+  filesystem:
+    filename: /config/notification.txt
+
+identity_validation:
+  reset_password:
+    jwt_secret: "another-long-random-secret"

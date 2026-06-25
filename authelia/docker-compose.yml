@@ -1,0 +1,53 @@
+services:
+
+  swag:
+    image: lscr.io/linuxserver/swag:latest
+    container_name: swag
+
+    cap_add:
+      - NET_ADMIN
+
+    environment:
+      - TZ=Europe/Rome
+
+      # temporanei
+      - URL=lab.local
+      - SUBDOMAINS=wildcard
+      - VALIDATION=http
+
+    ports:
+      - 80:80
+      - 443:443
+
+    volumes:
+      - ./swag:/config
+
+    restart: unless-stopped
+
+    networks:
+      - proxy
+
+  authelia:
+    image: authelia/authelia:latest
+    container_name: authelia
+
+    volumes:
+      - ./authelia:/config
+
+    restart: unless-stopped
+
+    networks:
+      - proxy
+
+  whoami:
+    image: traefik/whoami:latest
+    container_name: whoami
+
+    restart: unless-stopped
+
+    networks:
+      - proxy
+
+networks:
+  proxy:
+    external: true

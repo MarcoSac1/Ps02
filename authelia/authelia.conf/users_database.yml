@@ -1,0 +1,5 @@
+users:
+  testuser:
+    displayname: User
+    password: "1"
+    email: test@example.com
