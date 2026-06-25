@@ -1,36 +1,53 @@
-version: '3.8'
-
 services:
-  nextcloud-db:
-    image: postgres:15-alpine
-    container_name: nextcloud-db
-    restart: unless-stopped
-    volumes:
-      - ./db:/var/lib/postgresql/data
-    environment:
-      - POSTGRES_DB=nextcloud
-      - POSTGRES_USER=nextcloud
-      - POSTGRES_PASSWORD=CloudSJA
 
-  nextcloud-app:
-    image: nextcloud:stable
-    container_name: nextcloud-app
-    restart: unless-stopped
-    depends_on:
-      - nextcloud-db
-    volumes:
-      - ./html:/var/www/html
-      - ./data:/var/www/html/data
+  swag:
+    image: lscr.io/linuxserver/swag:latest
+    container_name: swag
+
+    cap_add:
+      - NET_ADMIN
+
     environment:
-      - POSTGRES_HOST=nextcloud-db
-      - POSTGRES_DB=nextcloud
-      - POSTGRES_USER=nextcloud
-      - POSTGRES_PASSWORD=CloudSJA
-      - NEXTCLOUD_ADMIN_USER=admin
-      - NEXTCLOUD_ADMIN_PASSWORD=AdminSJA
+      - TZ=Europe/Rome
+
+      # temporanei
+      - URL=lab.local
+      - SUBDOMAINS=wildcard
+      - VALIDATION=http
+
+    ports:
+      - 80:80
+      - 443:443
+
+    volumes:
+      - ./swag:/config
+
+    restart: unless-stopped
+
     networks:
-      - proxy-network # La rete in comune con il tuo reverse proxy e Authelia
+      - proxy
+
+  authelia:
+    image: authelia/authelia:latest
+    container_name: authelia
+
+    volumes:
+      - ./authelia:/config
+
+    restart: unless-stopped
+
+    networks:
+      - proxy
+
+  whoami:
+    image: traefik/whoami:latest
+    container_name: whoami
+
+    restart: unless-stopped
+
+    networks:
+      - proxy
 
 networks:
-  proxy-network:
+  proxy:
     external: true
