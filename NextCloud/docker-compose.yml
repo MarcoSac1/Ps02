@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  nextcloud-db:
+    image: postgres:15-alpine
+    container_name: nextcloud-db
+    restart: unless-stopped
+    volumes:
+      - ./db:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=nextcloud
+      - POSTGRES_USER=nextcloud
+      - POSTGRES_PASSWORD=CloudSJA
+
+  nextcloud-app:
+    image: nextcloud:stable
+    container_name: nextcloud-app
+    restart: unless-stopped
+    depends_on:
+      - nextcloud-db
+    volumes:
+      - ./html:/var/www/html
+      - ./data:/var/www/html/data
+    environment:
+      - POSTGRES_HOST=nextcloud-db
+      - POSTGRES_DB=nextcloud
+      - POSTGRES_USER=nextcloud
+      - POSTGRES_PASSWORD=CloudSJA
+      - NEXTCLOUD_ADMIN_USER=admin
+      - NEXTCLOUD_ADMIN_PASSWORD=AdminSJA
+    networks:
+      - proxy-network # La rete in comune con il tuo reverse proxy e Authelia
+
+networks:
+  proxy-network:
+    external: true
