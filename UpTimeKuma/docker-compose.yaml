@@ -1,12 +1,79 @@
 services:
+
+  swag:
+    image: lscr.io/linuxserver/swag:latest
+    container_name: swag
+    cap_add:
+      - NET_ADMIN
+    environment:
+      PUID: 1000
+      PGID: 1000
+      TZ: Europe/Rome
+      URL: tuodominio.com          # dominio principale
+      SUBDOMAINS: cloud,auth,status,uptime
+      VALIDATION: http             # oppure 'dns' se usi un provider DNS
+      EMAIL: tua@email.com
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./swag/config:/config
+    restart: unless-stopped
+
+  authelia:
+    image: authelia/authelia:latest
+    container_name: authelia
+    volumes:
+      - ./authelia:/config
+    environment:
+      TZ: Europe/Rome
+    restart: unless-stopped
+    expose:
+      - "9091"
+
+  nextcloud-db:
+    image: mariadb:11
+    container_name: nextcloud-db
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_DATABASE: nextcloud
+      MYSQL_USER: nextcloud
+      MYSQL_PASSWORD: ncpass
+    volumes:
+      - ./nextcloud/db:/var/lib/mysql
+    restart: unless-stopped
+
+  nextcloud:
+    image: nextcloud:latest
+    container_name: nextcloud
+    depends_on:
+      - nextcloud-db
+    environment:
+      MYSQL_HOST: nextcloud-db
+      MYSQL_DATABASE: nextcloud
+      MYSQL_USER: nextcloud
+      MYSQL_PASSWORD: ncpass
+      NEXTCLOUD_TRUSTED_DOMAINS: cloud.tuodominio.com
+    volumes:
+      - ./nextcloud/data:/var/www/html
+    restart: unless-stopped
+    expose:
+      - "80"
+
   uptime-kuma:
     image: louislam/uptime-kuma:2
     container_name: uptime-kuma
     restart: unless-stopped
-    ports:
-      - "3001:3001"
+    expose:
+      - "3001"
     volumes:
       - uptime-kuma-data:/app/data
+    depends_on:
+      - swag
 
 volumes:
-  uptime-kuma-data:   
+  uptime-kuma-data:
+
+networks:
+  default:
+    name: homelab
