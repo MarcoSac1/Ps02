@@ -1,11 +1,6 @@
 services:
   pihole:
     image: pihole/pihole:latest 
-    ports: 
-      - "7070:53/tcp"
-      - "7070:53/udp"
-      - "8080:80/tcp"
-      - "443:443/tcp"
     environment:
       file: .env
     volumes:
@@ -15,3 +10,4 @@ services:
       - SYS_TIME
       - SYS_NICE
     restart: unless-stopped
+    network_mode: host 
